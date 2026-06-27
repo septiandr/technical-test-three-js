@@ -4,11 +4,12 @@ import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls, Grid, GizmoHelper, GizmoViewcube } from "@react-three/drei";
 import * as THREE from "three";
 import { SceneModels } from "./SceneModels";
+import { CameraRig } from "./CameraRig";
 import { useEffect } from "react";
 import { useViewerStore } from "@/store/useViewerStore";
 
 function ThreeSetup() {
-  const { gl, size } = useThree();
+  const { gl } = useThree();
   
   useEffect(() => {
     // Atur shadow map secara eksplisit
@@ -38,8 +39,6 @@ function ThreeSetup() {
 }
 
 export function Scene() {
-  const hasModels = useViewerStore(state => state.models.length > 0);
-  
   return (
     <div className="h-full w-full overflow-hidden">
       <Canvas
@@ -73,21 +72,7 @@ export function Scene() {
         />
         
         {/* Background warna solid untuk material */}
-        <color attach="background" args={["#1a1a2e"]} />
-
-        {/* Model Kubus Dasar (hanya tampil ketika tidak ada model) */}
-        {!hasModels && (
-          <mesh position={[0, 1, 0]} castShadow receiveShadow>
-            <boxGeometry args={[2, 2, 2]} />
-            <meshStandardMaterial color="#38bdf8" roughness={0.4} metalness={0.3} />
-          </mesh>
-        )}
-
-        {/* Tanah/Plane */}
-        <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-          <planeGeometry args={[10, 10]} />
-          <meshStandardMaterial color="#2a2a4a" />
-        </mesh>
+        <color attach="background" args={["#fff"]} />
 
         {/* Semua Model yang Dimuat */}
         <SceneModels />
@@ -103,6 +88,9 @@ export function Scene() {
           minDistance={0.5}
           maxDistance={50}
         />
+
+        {/* Camera Rig untuk transisi dan fit to view */}
+        <CameraRig />
 
         {/* Gizmo Kamera */}
         <GizmoHelper alignment="bottom-right" margin={[80, 80]}>

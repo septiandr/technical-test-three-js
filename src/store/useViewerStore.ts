@@ -36,16 +36,16 @@ export const useViewerStore = create<ViewerStore>()(
 
     addModels: (files) =>
       set((state) => {
-        console.log("Adding files:", files);
         files.forEach((file) => {
           const model: LoadedModel = {
-            id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            id:
+              globalThis.crypto?.randomUUID?.() ??
+              `${Date.now()}-${Math.random().toString(16).slice(2)}`,
             name: file.name.replace(/\.(glb|gltf|stl)$/i, ""),
             url: URL.createObjectURL(file),
             format: getModelFormat(file.name),
             visible: true,
           };
-          console.log("Adding model:", model);
           state.models.push(model);
         });
       }),
@@ -87,13 +87,17 @@ export const useViewerStore = create<ViewerStore>()(
 
     clearAll: () =>
       set((state) => {
+        console.log("=== clearAll called ===");
+        console.log("Revoking URLs for", state.models.length, "models");
         state.models.forEach((model) => {
           if (model.url) {
             URL.revokeObjectURL(model.url);
+            console.log("Revoked URL:", model.url);
           }
         });
         state.models = [];
         state.selectedId = null;
+        console.log("Models cleared, current length:", state.models.length);
       }),
 
     loadDefaultAssets: async () => {
@@ -108,10 +112,12 @@ export const useViewerStore = create<ViewerStore>()(
             console.log("Asset response:", res);
             const blob = await res.blob();
             console.log("Asset blob:", blob);
-            const file = new File([blob], `${asset.name}.${asset.format}`, { type: blob.type });
+            const file = new File([blob], `${asset.name}.${asset.format}`, {
+              type: blob.type,
+            });
             console.log("Created file:", file);
             return file;
-          })
+          }),
         );
         console.log("Calling addModels with files:", files);
         useViewerStore.getState().addModels(files);
@@ -121,5 +127,5 @@ export const useViewerStore = create<ViewerStore>()(
         set({ isLoading: false });
       }
     },
-  }))
+  })),
 );
