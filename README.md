@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Technical Test — Three.js Viewer
 
-## Getting Started
+A clean React + Next.js 3D model viewer built with React Three Fiber, Drei, and Zustand.
 
-First, run the development server:
+## ✅ Implemented Features
+
+- Drag-and-drop file loading for `.stl`, `.glb`, `.gltf`
+- File input fallback for manual uploads
+- React Three Fiber scene with model loading and asset scaling
+- Drei helpers: `OrbitControls`, `Grid`, `GizmoHelper`, `GizmoViewcube`, `useGLTF`
+- Smooth camera transitions with lerped animation
+- Camera view presets and fit-to-view support
+- Zustand state management for model list, selection, visibility, and loading state
+- Model visibility toggle and delete functionality
+- Sidebar UI for model management and controls
+
+## 📋 Evaluation Checklist
+
+| Area | Status | Notes |
+| --- | --- | --- |
+| Code quality and structure | ✅ | Modular components, hooks, Zustand store, clear separation of concern |
+| Three.js / 3D implementation | ✅ | Uses R3F, Drei, custom loaders, model normalization, lighting, grid, gizmo |
+| User interaction and camera controls | ✅ | Orbit controls, camera presets, smooth animated transitions, fit-to-view |
+| UI and usability | ✅ | Sidebar, model list, drag/drop upload, clear all, visual feedback |
+| Documentation quality | ✅ | README updated with usage and feature summary |
+| AI usage transparency | ✅ | Documented in this README |
+
+## 🚀 Bonus Points Checklist
+
+- [x] Support drag-and-drop file loading
+- [x] Use React Three Fiber and Drei effectively
+- [x] Implement smooth camera animations
+- [x] State management with Zustand
+- [x] Add model visibility toggle or delete functionality
+
+## 🧠 AI Transparency
+
+This repository implementation does not rely on external AI model inference at runtime. All application logic and rendering are implemented directly in React, Three.js, and Zustand.
+
+Saya menggunakan AI untuk completion, debug, dan styling selama pengembangan. Namun, aplikasi yang berjalan tetap sepenuhnya dibangun dengan kode lokal dan tidak memerlukan inferensi AI saat runtime.
+
+Lihat dokumentasi lengkap di [AI_USAGE.md](AI_USAGE.md).
+
+## 📦 Getting Started
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Run the application
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 3. Use the viewer
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Drag and drop a `.stl`, `.gltf`, or `.glb` file into the app
+- Or click the upload area to select files manually
+- Use the sidebar to toggle visibility, delete models, and switch camera views
+- Use mouse controls to orbit, pan, and zoom the 3D scene
 
-## Learn More
+### 4. Build for production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 5. Start production server
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run start
+```
 
-## Deploy on Vercel
+## 📁 Key Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- `src/app/page.tsx` — application shell and layout
+- `src/components/ui/FileUpload.tsx` — drag-and-drop upload + file validation
+- `src/components/ui/Sidebar.tsx` — model list, camera controls, fit-to-view, clear all
+- `src/components/ui/ModelListItem.tsx` — visibility toggle + delete
+- `src/components/viewer/Scene.tsx` — R3F scene, lights, controls, gizmo
+- `src/components/viewer/ModelMesh.tsx` — `.stl` and `.gltf/.glb` loading + normalization
+- `src/hooks/useCameraTransition.ts` — smooth animated camera movement
+- `src/store/useViewerStore.ts` — Zustand state management
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 💡 Notes
+
+- The viewer supports multiple models loaded concurrently.
+- Hidden models are still tracked and can be toggled back on.
+- The scene automatically fits visible models when requested.
+- Model assets are loaded using browser blob URLs and released when removed.

@@ -11,11 +11,9 @@ export function FileUpload() {
 
   const handleFiles = useCallback(
     (files: FileList | File[]) => {
-      console.log("handleFiles called with:", files);
       const validFiles = Array.from(files).filter((file) =>
         /\.(stl|gltf|glb)$/i.test(file.name)
       );
-      console.log("validFiles:", validFiles);
       if (validFiles.length > 0) {
         addModels(validFiles);
       }

@@ -21,7 +21,6 @@ interface ModelMeshProps {
 }
 
 export function ModelMesh({ model }: ModelMeshProps) {
-  console.log("Rendering ModelMesh:", model);
   return (
     <group visible={model.visible} userData={{ isModel: true }}>
       <Suspense fallback={<LoadingBox />}>
@@ -36,9 +35,7 @@ interface ModelUrlProps {
 }
 
 function STLModel({ url }: ModelUrlProps) {
-  console.log("STLModel loading url:", url);
   const geometry = useLoader(STLLoader, url);
-  console.log("STLModel geometry loaded:", geometry);
 
   const processedGeometry = useMemo(() => {
     const geom = geometry.clone();
@@ -60,9 +57,7 @@ function STLModel({ url }: ModelUrlProps) {
 }
 
 function GLTFModel({ url }: ModelUrlProps) {
-  console.log("GLTFModel loading url:", url);
   const { scene } = useGLTF(url);
-  console.log("GLTFModel scene loaded:", scene);
 
   const processedScene = useMemo(() => {
     const cloned = scene.clone();

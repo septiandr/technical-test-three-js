@@ -87,39 +87,27 @@ export const useViewerStore = create<ViewerStore>()(
 
     clearAll: () =>
       set((state) => {
-        console.log("=== clearAll called ===");
-        console.log("Revoking URLs for", state.models.length, "models");
         state.models.forEach((model) => {
           if (model.url) {
             URL.revokeObjectURL(model.url);
-            console.log("Revoked URL:", model.url);
           }
         });
         state.models = [];
         state.selectedId = null;
-        console.log("Models cleared, current length:", state.models.length);
       }),
 
     loadDefaultAssets: async () => {
-      console.log("loadDefaultAssets starting");
       set({ isLoading: true });
       try {
-        console.log("DEFAULT_ASSETS:", DEFAULT_ASSETS);
         const files = await Promise.all(
           DEFAULT_ASSETS.map(async (asset) => {
-            console.log("Fetching asset:", asset);
             const res = await fetch(asset.path);
-            console.log("Asset response:", res);
             const blob = await res.blob();
-            console.log("Asset blob:", blob);
-            const file = new File([blob], `${asset.name}.${asset.format}`, {
+            return new File([blob], `${asset.name}.${asset.format}`, {
               type: blob.type,
             });
-            console.log("Created file:", file);
-            return file;
           }),
         );
-        console.log("Calling addModels with files:", files);
         useViewerStore.getState().addModels(files);
       } catch (error) {
         console.error("Failed to load default assets:", error);
