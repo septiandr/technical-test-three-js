@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "3D Viewer Starter",
-  description: "A clean Next.js starter for a Three.js viewer application.",
+  title: "3D Viewer",
+  description: "Interactive 3D model viewer built with Next.js, Three.js, and React Three Fiber",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="h-full m-0 p-0 overflow-hidden bg-[#0f0f1a]">{children}</body>
     </html>
   );
 }

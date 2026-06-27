@@ -1,5 +1,17 @@
+import dynamic from "next/dynamic";
 import { Sidebar } from "@/components/ui/Sidebar";
-import { Scene } from "@/components/viewer/Scene";
+
+const Scene = dynamic(
+  () => import("@/components/viewer/Scene"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex-1 flex items-center justify-center bg-neutral-950">
+        <p className="text-neutral-400 text-sm">Loading 3D Viewer...</p>
+      </div>
+    )
+  }
+);
 
 export function AppLayout() {
   return (

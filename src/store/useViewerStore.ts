@@ -1,84 +1,67 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { CameraView, LoadedModel, ViewerState } from "@/types";
+import type { CameraView, LoadedModel, ModelFormat } from "@/types";
+import { DEFAULT_ASSETS } from "@/utils/defaultAssets";
 
-interface ViewerStore extends ViewerState {
+interface ViewerStore {
+  models: LoadedModel[];
+  selectedId: string | null;
+  activeView: CameraView | null;
+  isLoading: boolean;
+  triggerFitView: number;
   addModels: (files: File[]) => void;
   removeModel: (id: string) => void;
   toggleVisibility: (id: string) => void;
-  setSelectedModel: (modelId: string | null) => void;
+  setSelectedId: (id: string | null) => void;
   setActiveView: (view: CameraView) => void;
-  setLoading: (val: boolean) => void;
-  clearAllModels: () => void;
+  triggerFitToView: () => void;
+  clearAll: () => void;
+  loadDefaultAssets: () => Promise<void>;
 }
 
-const createPlaceholderFile = () => new File([""], "scene.glb", { type: "model/gltf-binary" });
-
-const getModelFormat = (fileName: string): LoadedModel["format"] => {
+const getModelFormat = (fileName: string): ModelFormat => {
   const ext = fileName.split(".").pop()?.toLowerCase();
-
   if (ext === "stl") return "stl";
   if (ext === "gltf") return "gltf";
   return "glb";
 };
 
-const createModelFromFile = (file: File): LoadedModel => ({
-  id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-  name: file.name.replace(/\.(glb|gltf|stl)$/i, ""),
-  file,
-  url: URL.createObjectURL(file),
-  visible: true,
-  format: getModelFormat(file.name),
-});
-
-const initialModels: LoadedModel[] = [
-  {
-    id: "model-a",
-    name: "Base mesh",
-    file: createPlaceholderFile(),
-    url: "",
-    visible: true,
-    format: "glb",
-  },
-  {
-    id: "model-b",
-    name: "Environment kit",
-    file: createPlaceholderFile(),
-    url: "",
-    visible: true,
-    format: "glb",
-  },
-];
-
 export const useViewerStore = create<ViewerStore>()(
   immer((set) => ({
-    models: initialModels,
-    selectedModelId: initialModels[0]?.id ?? null,
-    activeView: "front",
+    models: [],
+    selectedId: null,
+    activeView: null,
     isLoading: false,
+    triggerFitView: 0,
+
     addModels: (files) =>
       set((state) => {
+        console.log("Adding files:", files);
         files.forEach((file) => {
-          state.models.push(createModelFromFile(file));
+          const model: LoadedModel = {
+            id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+            name: file.name.replace(/\.(glb|gltf|stl)$/i, ""),
+            url: URL.createObjectURL(file),
+            format: getModelFormat(file.name),
+            visible: true,
+          };
+          console.log("Adding model:", model);
+          state.models.push(model);
         });
-
-        if (!state.selectedModelId && state.models.length > 0) {
-          state.selectedModelId = state.models[0]?.id ?? null;
-        }
       }),
+
     removeModel: (id) =>
       set((state) => {
         const target = state.models.find((model) => model.id === id);
         if (target?.url) {
           URL.revokeObjectURL(target.url);
         }
-
         state.models = state.models.filter((model) => model.id !== id);
-
-        if (state.selectedModelId === id) {
-          state.selectedModelId = state.models[0]?.id ?? null;
+        if (state.selectedId === id) {
+          state.selectedId = null;
         }
       }),
+
     toggleVisibility: (id) =>
       set((state) => {
         const target = state.models.find((model) => model.id === id);
@@ -86,28 +69,57 @@ export const useViewerStore = create<ViewerStore>()(
           target.visible = !target.visible;
         }
       }),
-    setSelectedModel: (modelId) =>
+
+    setSelectedId: (id) =>
       set((state) => {
-        state.selectedModelId = modelId;
+        state.selectedId = id;
       }),
+
     setActiveView: (view) =>
       set((state) => {
         state.activeView = view;
       }),
-    setLoading: (val) =>
+
+    triggerFitToView: () =>
       set((state) => {
-        state.isLoading = val;
+        state.triggerFitView += 1;
       }),
-    clearAllModels: () =>
+
+    clearAll: () =>
       set((state) => {
         state.models.forEach((model) => {
           if (model.url) {
             URL.revokeObjectURL(model.url);
           }
         });
-
         state.models = [];
-        state.selectedModelId = null;
+        state.selectedId = null;
       }),
+
+    loadDefaultAssets: async () => {
+      console.log("loadDefaultAssets starting");
+      set({ isLoading: true });
+      try {
+        console.log("DEFAULT_ASSETS:", DEFAULT_ASSETS);
+        const files = await Promise.all(
+          DEFAULT_ASSETS.map(async (asset) => {
+            console.log("Fetching asset:", asset);
+            const res = await fetch(asset.path);
+            console.log("Asset response:", res);
+            const blob = await res.blob();
+            console.log("Asset blob:", blob);
+            const file = new File([blob], `${asset.name}.${asset.format}`, { type: blob.type });
+            console.log("Created file:", file);
+            return file;
+          })
+        );
+        console.log("Calling addModels with files:", files);
+        useViewerStore.getState().addModels(files);
+      } catch (error) {
+        console.error("Failed to load default assets:", error);
+      } finally {
+        set({ isLoading: false });
+      }
+    },
   }))
 );
